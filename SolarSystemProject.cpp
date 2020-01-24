@@ -241,28 +241,30 @@ void myRenderScene() {
     // EarthMatrix - specifies the size of the earth and its rotation on its axis (EARTH ITSELF)
 	LinearMapR4 EarthPosMatrix = SunPosMatrix;
     double revolveAngle = (DayOfYear / 365.0) * PI2;
-	double degree18 = PI2 / 20;
-	// Place the earth four units away from the sun
+	double degree18 = PI2 / 20;	// a tilt degree of 18
+	// Place the earth four units away from the sun based on a revolve angle
 	EarthPosMatrix.Mult_glTranslate(-4.0*cos(revolveAngle), 0.0, 4.0*sin(revolveAngle));
-	EarthPosMatrix.Mult_glRotate(degree18, 0.0, 1.0, -1.0);   // Revolve the earth around the sun
+	EarthPosMatrix.Mult_glRotate(degree18, 0.0, 1.0, -1.0);
 	
 
 	LinearMapR4 EarthMatrix = EarthPosMatrix;
     double earthRotationAngle = (HourOfDay / 24.0) * PI2;
-    EarthMatrix.Mult_glRotate(earthRotationAngle, 0.0, 1.0, 0.0);   // Rotate earth on y-axis
-	EarthMatrix.Mult_glScale(0.5);                                  // Make radius 0.5.
+    EarthMatrix.Mult_glRotate(earthRotationAngle, 0.0, 1.0, 0.0);	// Rotate earth on y-axis
+	EarthMatrix.Mult_glScale(0.5);	// Make radius 0.5.
 	EarthMatrix.DumpByColumns(matEntries);
 	glUniformMatrix4fv(modelviewMatLocation, 1, false, matEntries);
-	glVertexAttrib3f(vertColor_loc, 0.2f, 0.4f, 1.0f);     // Make the earth bright cyan-blue
+	glVertexAttrib3f(vertColor_loc, 0.2f, 0.4f, 1.0f);	// Make the earth bright cyan-blue
 	Earth.Render();
 
+
 	// The ring (torus) around the sun.
-	LinearMapR4 RingMatrix = EarthPosMatrix;
+	LinearMapR4 RingMatrix = EarthPosMatrix;	// place the torus around the Earth
 	RingMatrix.Mult_glScale(1.0);
 	RingMatrix.DumpByColumns(matEntries);
 	glUniformMatrix4fv(modelviewMatLocation, 1, false, matEntries);
 	glVertexAttrib3f(vertColor_loc, 1.0f, 0.0f, 0.0f);     // Make the ring red
 	Ring.Render();
+
 
     // MoonMatrix - control placement, and size of the moon.
  	LinearMapR4 MoonMatrix = EarthPosMatrix;        // Base the moon's matrix off the earth's *POS* matrix (EarthPosMatrix)
@@ -275,6 +277,8 @@ void myRenderScene() {
 	glVertexAttrib3f(vertColor_loc, 0.9f, 0.9f, 0.9f);     // Make the moon bright gray
 	Moon1.Render();
 
+
+	// MoonletMatrix - control placement, and size of the moonlet
 	LinearMapR4 MoonletMatrix = MoonMatrix;
 	double moonletRotationAngle = (DayOfYear*24.0 / 365.0) * PI2;
 	MoonletMatrix.Mult_glRotate(moonletRotationAngle, 0.0, 1.0, 0.0);  // Revolving around the earth twelve times per year
