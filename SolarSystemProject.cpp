@@ -70,8 +70,8 @@ double PreviousTime = 0.0;
 // These three variables control the animation's state and speed.
 double HourOfDay = 0.0;
 double DayOfYear = 0.0;
-double DayOfPlanetXYear = 0.0;
-double AnimateIncrement = 24.0;  // Time step for animation (in units of hours)
+double DayOfPlanetXYear = 0.0;	// days of PlanetX
+double AnimateIncrement = 24.0;	// Time step for animation (in units of hours)
 
 double viewAzimuth = 0.25;	// Angle of view up/down (in radians)
 LinearMapR4 viewMatrix;		// The current view matrix, based on viewAzimuth and viewDirection.
@@ -87,7 +87,7 @@ LinearMapR4 viewMatrix;		// The current view matrix, based on viewAzimuth and vi
 GlGeomSphere Moon1(6, 6);    // A sphere with 6 slices and 6 stacks
 GlGeomSphere Earth(8, 12);    // A sphere with 8 slices and 12 stacks
 GlGeomSphere Sun(10, 10);    // A sphere with 10 slices and 10 stacks
-GlGeomTorus Ring(8, 20, 0.02f/*0.08f*/);  // A torus with 20 rings, each with 8 sides.  Minor radius 0.08.
+GlGeomTorus Ring(8, 20, 0.02f);  // A torus with 20 rings, each with 8 sides.  Minor radius 0.02.
 
 // We create one shader program: consisting of a vertex shader and a fragment shader
 unsigned int shaderProgram1;
@@ -177,12 +177,13 @@ void myRenderScene() {
         // Update the animation state
         HourOfDay += thisAnimateIncrement;
         DayOfYear += thisAnimateIncrement / 24.0;
+		// update PlanetX day
 		DayOfPlanetXYear += thisAnimateIncrement / 39.45;	// = 24 * (365 / 600)
 
         HourOfDay = HourOfDay - ((int)(HourOfDay / 24)) * 24;       // Wrap back to be in range [0,24)
         DayOfYear = DayOfYear - ((int)(DayOfYear / 365)) * 365;     // Wrap back to be in range [0,365)
-		DayOfPlanetXYear = 
-			DayOfPlanetXYear - ((int)(DayOfPlanetXYear / 600)) * 600;
+		DayOfPlanetXYear =
+			DayOfPlanetXYear - ((int)(DayOfPlanetXYear / 600)) * 600;	// Wrap back to be in range [0,600)
 
         if (singleStep) {
             spinMode = false;       // If in single step mode, turn off future animation
@@ -201,28 +202,34 @@ void myRenderScene() {
 	//glVertexAttrib3f(vertColor_loc, 1.0f, 1.0f, 0.0f);     // Make the sun yellow
 	//Sun.Render();
 
-	LinearMapR4 Sun1Matrix = SunPosMatrix;
+
+	// set up the first Sun
+	LinearMapR4 FirstSunMatrix = SunPosMatrix;
 	double sunRotationAngle = (3 * DayOfYear / 365.0) * PI2;
-	Sun1Matrix.Mult_glRotate(sunRotationAngle, 0.0, 1.0, 0.0);
-	Sun1Matrix.Mult_glTranslate(0.0, 0.0, 0.84);
-	Sun1Matrix.Mult_glScale(0.7);
-	Sun1Matrix.DumpByColumns(matEntries);
+	FirstSunMatrix.Mult_glRotate(sunRotationAngle, 0.0, 1.0, 0.0);
+	FirstSunMatrix.Mult_glTranslate(0.0, 0.0, 0.84);
+	FirstSunMatrix.Mult_glScale(0.7);
+	FirstSunMatrix.DumpByColumns(matEntries);
 	glUniformMatrix4fv(modelviewMatLocation, 1, false, matEntries);
 	glVertexAttrib3f(vertColor_loc, 1.0f, 1.0f, 0.0f);
 	Sun.Render();
 
-	LinearMapR4 Sun2Matrix = SunPosMatrix;
-	Sun2Matrix.Mult_glRotate(sunRotationAngle, 0.0, 1.0, 0.0);
-	Sun2Matrix.Mult_glTranslate(0.0, 0.0, -0.85);
-	Sun2Matrix.Mult_glScale(0.7);
-	Sun2Matrix.DumpByColumns(matEntries);
+
+	// set up the second Sun
+	LinearMapR4 SecondSunMatrix = SunPosMatrix;
+	SecondSunMatrix.Mult_glRotate(sunRotationAngle, 0.0, 1.0, 0.0);
+	SecondSunMatrix.Mult_glTranslate(0.0, 0.0, -0.85);
+	SecondSunMatrix.Mult_glScale(0.7);
+	SecondSunMatrix.DumpByColumns(matEntries);
 	glUniformMatrix4fv(modelviewMatLocation, 1, false, matEntries);
 	glVertexAttrib3f(vertColor_loc, 1.0f, 1.0f, 0.0f);
 	Sun.Render();
 
+
+	// set up PlanetX which orbits the Sun
 	LinearMapR4 PlanetXMatrix = SunPosMatrix;
 	double planetXRevolveAngle = (DayOfPlanetXYear / 600.0) * PI2;
-	PlanetXMatrix.Mult_glRotate(planetXRevolveAngle, 0.0, -1.0, 0.0);
+	PlanetXMatrix.Mult_glRotate(planetXRevolveAngle, 0.0, -1.0, 0.0);	// rotates clockwise
 	PlanetXMatrix.Mult_glTranslate(0.0, 0.0, 6.0);
 	PlanetXMatrix.Mult_glScale(0.3);
 	PlanetXMatrix.DumpByColumns(matEntries);
