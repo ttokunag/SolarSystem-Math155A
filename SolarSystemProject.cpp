@@ -193,6 +193,11 @@ void myRenderScene() {
 
 	glUseProgram(shaderProgram1);
 
+	/* ********************************************************************************* */
+	/**************************** Start of Objects to Render *************************** */
+	/* ********************************************************************************* */
+
+
 	// SunPosMatrix - specifies position of the sun (SOLAR SYSTEM)
 	// SunMatrix - specifies the size of the sun and its rotation on its axis (SUN ITSELF)
 	LinearMapR4 SunPosMatrix = viewMatrix;				// Place Sun at center of the scene
@@ -288,6 +293,13 @@ void myRenderScene() {
 	glUniformMatrix4fv(modelviewMatLocation, 1, false, matEntries);
 	glVertexAttrib3f(vertColor_loc, 0.0f, 1.0f, 0.0f);     // Make the moon bright gray
 	Moon1.Render();
+
+
+	/* ******************************************************************************************** */
+	/* *************************** End of Objects to Render *************************************** */
+	/* ******************************************************************************************** */
+
+
 
 	check_for_opengl_errors();   // Really a great idea to check for errors -- esp. good for debugging!
 }
